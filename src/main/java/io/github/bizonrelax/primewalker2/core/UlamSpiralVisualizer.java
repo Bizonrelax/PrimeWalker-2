@@ -1,62 +1,46 @@
 package io.github.bizonrelax.primewalker2.core;
 
-import java.awt.geom.Point2D;
-
 /**
  * Спираль Улама (ТЗ, алгоритм 1): числа раскладываются в квадратной спирали против
- * часовой стрелки, начиная от центра; простые выделяются. Точки трассы — узлы сетки,
- * соответствующие числам start..start+steps-1.
+ * часовой стрелки от центра; ось y — математическая (вверх положительно).
+ * Обход: 1=(0,0), 2=(1,0), 3=(1,1), 4=(0,1), 5=(-1,1), 6=(-1,0), 7=(-1,-1), ...
  */
 public final class UlamSpiralVisualizer extends BaseVisualizer {
 
-    public UlamSpiralVisualizer() {
-        this(1.0);
-    }
-
-    public UlamSpiralVisualizer(double scale) {
-        super(scale);
-    }
+    public static final String NAME = "Ulam Spiral";
 
     @Override
-    public String name() {
-        return "Ulam Spiral";
-    }
+    public String displayName() { return NAME; }
 
     @Override
-    protected Point2D.Double startPoint() {
-        return new Point2D.Double(0, 0);
-    }
-
-    /**
-     * Приращение от позиции числа value-1 к позиции value в спирали.
-     * Ось y экранных координат (вниз положительна): вверх по экрану — отрицательный dy.
-     */
-    @Override
-    protected Point2D.Double step(long value, boolean isPrime) {
-        if (value <= 1) {
-            // первое число уже в стартовой точке — смещения нет
-            return new Point2D.Double(0, 0);
+    public VisualizationResult render(long start, int steps, double scale) {
+        checkSteps(steps);
+        checkScale(scale);
+        var xs = new double[steps];
+        var ys = new double[steps];
+        for (int i = 0; i < steps; i++) {
+            long[] p = spiralPos(Math.addExact(start, i));
+            xs[i] = p[0] * scale;
+            ys[i] = p[1] * scale;
         }
-        long[] cur = spiralPos(value);
-        long[] prev = spiralPos(value - 1);
-        return new Point2D.Double(cur[0] - prev[0], -(cur[1] - prev[1]));
+        return bounds(xs, ys, values(start, steps), flags(start, steps), NAME);
     }
 
     /**
-     * Позиция числа n>=1 в квадратной спирали против часовой, центр 1=(0,0), ось y вверх.
-     * Обход: 1=(0,0), 2=(1,0) право, 3=(1,1) вверх, 4=(0,1), 5=(-1,1), 6=(-1,0),
-     * 7=(-1,-1), 8=(0,-1), 9=(1,-1), ...
+     * Позиция числа n (любое целое: отрицательные отображаются на |n| для
+     * непрерывности сетки спирали) в квадратной спирали против часовой, 1=(0,0).
      */
     static long[] spiralPos(long n) {
-        if (n < 1) throw new IllegalArgumentException("n >= 1, получено " + n);
-        if (n == 1) return new long[]{0, 0};
-        long ring = (long) Math.floor(Math.sqrt((double) n));
+        long a = Math.abs(n);
+        if (a < 1) return new long[]{0, 0};
+        if (a == 1) return new long[]{0, 0};
+        long ring = (long) Math.floor(Math.sqrt((double) a));
         // кольцо r охватывает числа ((2r-1)^2, (2r+1)^2]; коррекция округления sqrt
-        while ((2 * ring + 1) * (2 * ring + 1L) < n) ring++;
-        while (ring > 0 && (2 * ring - 1) * (2 * ring - 1L) >= n) ring--;
+        while ((2 * ring + 1) * (2 * ring + 1L) < a) ring++;
+        while (ring > 0 && (2 * ring - 1) * (2 * ring - 1L) >= a) ring--;
         long s = 2 * ring;                                  // длина стороны кольца
         long prevMax = (2 * ring - 1) * (2 * ring - 1L);    // последнее число внутреннего кольца
-        long idx = n - prevMax;                             // 1..4s — позиция на дуге кольца
+        long idx = a - prevMax;                             // 1..4s — позиция на дуге кольца
         long cx, cy;
         if (idx <= s) {
             cx = ring; cy = -ring + idx;                    // правая колонка вверх

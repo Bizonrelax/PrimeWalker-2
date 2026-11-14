@@ -5,87 +5,72 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Базовый класс алгоритмов визуализации (ТЗ: расширяемость через наследование).
- * Шаблонный метод {@link #visualize(long, int)} строит трассу по последовательности
- * чисел start..start+steps-1; подкласс задаёт только геометрию шага
- * {@link #step(long, boolean)} и стартовую точку {@link #startPoint()}.
- * Ограничение ТЗ на число шагов (≤ 100 000 000) проверяется здесь централизованно.
+ * Базовый класс алгоритмов визуализации (порт core.BaseVisualizer, ТЗ: расширяемость
+ * через наследование). Подкласс задаёт геометрию трассы в {@link #render(long, int, double)};
+ * флаги простоты — детерминированная проверка пробным делением, независимая от кэша prime.*.
  */
 public abstract class BaseVisualizer {
 
     /** Максимальное число шагов по ТЗ (защита от исчерпания ресурсов). */
     public static final int MAX_STEPS = 100_000_000;
 
-    private final double scale;
-
-    protected BaseVisualizer(double scale) {
-        if (!(scale >= 0.1 && scale <= 10.0)) {
-            throw new IllegalArgumentException("Масштаб вне диапазона 0.1..10.0: " + scale);
-        }
-        this.scale = scale;
-    }
-
-    public double scale() {
-        return scale;
-    }
-
     /** Имя алгоритма для выпадающего списка UI и отчётов. */
-    public abstract String name();
+    public abstract String displayName();
 
     /**
-     * Приращение координат на числе value. Флаг isPrime — простое ли value
-     * (определяет смену направления/выделение). Значения возвращаются в
-     * единицах сетки до применения масштаба.
+     * Строит трассу: start — первое число, steps — количество чисел (1..MAX_STEPS),
+     * scale — длина шага в единицах сетки (0.1..10.0 по ТЗ).
      */
-    protected abstract Point2D.Double step(long value, boolean isPrime);
+    public abstract VisualizationResult render(long start, int steps, double scale);
 
-    /** Стартовая точка трассы в координатах сетки. */
-    protected abstract Point2D.Double startPoint();
-
-    /** Простота числа; детерминированная проверка пробным делением. */
-    protected boolean isPrime(long value) {
-        return PrimeSequences.isPrime(value);
-    }
-
-    /**
-     * Полный цикл: точки, флаги простоты, значения, границы.
-     * Трасса содержит steps+1 точек: точка 0 — служебная стартовая точка
-     * {@link #startPoint()}, точка i+1 — позиция числа start+i. Приращение
-     * {@link #step(long, boolean)} применяется на каждом числе (для первого
-     * числа подкласс возвращает нулевое смещение). Флаги и значения
-     * соответствуют позициям чисел: {@code values[i] = start+i},
-     * {@code primeFlags[i]} — простота этого числа.
-     *
-     * @param start начальное число (любое целое по ТЗ)
-     * @param steps количество чисел-шагов, 1..MAX_STEPS
-     * @return результат, готовый для render.RenderService
-     */
-    public VisualizationResult visualize(long start, int steps) {
+    /** Проверка диапазона steps; общие для всех алгоритмов границы ТЗ. */
+    protected static void checkSteps(int steps) {
         if (steps < 1 || steps > MAX_STEPS) {
             throw new IllegalArgumentException(
                     "Шагов должно быть 1.." + MAX_STEPS + ", получено: " + steps);
         }
-        List<Point2D.Double> path = new ArrayList<>(steps + 1);
-        boolean[] flags = new boolean[steps];
-        long[] values = new long[steps];
-        Bounds bounds = new Bounds();
+    }
 
-        Point2D.Double startPt = startPoint();
-        double cx = startPt.x, cy = startPt.y;
-        // узел 0 — служебная стартовая точка (не является позицией числа)
-        path.add(new Point2D.Double(cx, cy));
-        bounds.extend(cx, cy);
-        for (int i = 0; i < steps; i++) {
-            long v = start + i;
-            Point2D.Double d = step(v, isPrime(v));
-            // масштаб применяется к приращению: длина шага = scale единиц сетки
-            cx += d.x * scale;
-            cy += d.y * scale;
-            path.add(new Point2D.Double(cx, cy));
-            bounds.extend(cx, cy);
-            flags[i] = isPrime(v);
-            values[i] = v;
+    /** Проверка диапазона scale (ТЗ: 0.1..10.0). */
+    protected static void checkScale(double scale) {
+        if (!(scale >= 0.1 && scale <= 10.0)) {
+            throw new IllegalArgumentException("Масштаб вне диапазона 0.1..10.0: " + scale);
         }
-        return new VisualizationResult(path, flags, values, bounds, name());
+    }
+
+    /** Детерминированная простота числа (арбитр — ТЗ, поведение не зависит от состояния генератора). */
+    protected static boolean isPrimeValue(long v) {
+        return PrimeSequences.isPrime(v);
+    }
+
+    /** Флаги простоты для значений start..start+steps-1. */
+    protected static boolean[] flags(long start, int steps) {
+        var f = new boolean[steps];
+        for (int i = 0; i < steps; i++) f[i] = isPrimeValue(Math.addExact(start, i));
+        return f;
+    }
+
+    /** Значения последовательности start..start+steps-1. */
+    protected static long[] values(long start, int steps) {
+        var v = new long[steps];
+        for (int i = 0; i < steps; i++) v[i] = Math.addExact(start, i);
+        return v;
+    }
+
+    /** Границы массивов координат и сборка результата. */
+    protected static VisualizationResult bounds(double[] xs, double[] ys, long[] vals,
+                                                boolean[] fl, String algorithm) {
+        Bounds b = new Bounds();
+        for (int i = 0; i < xs.length; i++) b.extend(xs[i], ys[i]);
+        return new VisualizationResult(toPath(xs, ys), fl, vals, b, algorithm);
+    }
+
+    /** Список точек из массивов координат. */
+    protected static List<Point2D.Double> toPath(double[] xs, double[] ys) {
+        var p = new ArrayList<Point2D.Double>(xs.length);
+        for (int i = 0; i < xs.length; i++) {
+            p.add(new Point2D.Double(xs[i], ys[i]));
+        }
+        return p;
     }
 }

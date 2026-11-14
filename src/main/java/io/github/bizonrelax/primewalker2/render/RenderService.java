@@ -48,11 +48,11 @@ public final class RenderService {
      * Простые точки рисуются цветом opts.primeColor (или палитрой modulo),
      * последняя точка — opts.endColor, линия трассы — opts.pathColor.
      *
-     * @param path       точки трассы в координатах сетки (первая — служебная стартовая)
-     * @param primeFlags флаги простоты для точек 1..; индекс i соответствует path[i+1]
-     *                   (соглашение VisualizationResult); может быть null
+     * @param path       точки трассы в координатах постера
+     * @param primeFlags флаги простоты по индексу точки: primeFlags[i] ↔ path.get(i)
+     *                   (соглашение core.VisualizationResult); может быть null
      * @param values     числовые значения последовательности (для modulo-окраски);
-     *                   тот же сдвиг индексов, что и primeFlags; может быть null
+     *                   тот же индекс, что и primeFlags; может быть null
      * @param pose       преобразование сетка-&gt;пиксели (для одной плитки передаётся сдвиг)
      * @param opts       параметры рендеринга
      * @return готовое изображение TYPE_INT_RGB
@@ -80,9 +80,9 @@ public final class RenderService {
             }
 
             int ps = opts.pointSizePx();
-            // точки 1.. соответствуют флагам/значениям (path[0] — служебная стартовая)
-            for (int i = 1; i < path.size(); i++) {
-                int j = i - 1;
+            // индексы flags/values совпадают с индексами точек (VisualizationResult)
+            for (int i = 0; i < path.size(); i++) {
+                int j = i;
                 boolean isPrime = primeFlags != null && j < primeFlags.length && primeFlags[j];
                 boolean isLast = i == path.size() - 1;
                 Color c;

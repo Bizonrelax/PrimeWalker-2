@@ -8,16 +8,15 @@ import java.util.List;
  * флаги простоты каждой точки, сами числа и границы трассы.
  * Порт core.VisualizationResult — потребители: render.RenderService, export, ui.
  *
- * <p>Соглашение об индексах: {@code path} содержит на одну точку больше, чем
- * {@code primeFlags} и {@code values}: нулевая точка — служебная стартовая
- * (позиция числа {@code start} до первого перехода), точка {@code i+1}
- * соответствует числу {@code values[i]} с флагом {@code primeFlags[i]}.
+ * <p>Соглашение об индексах: {@code path.get(i)}, {@code primeFlags[i]} и
+ * {@code values[i]} соответствуют одному и тому же числу {@code values[i]}
+ * (конвенция выбрана порт-совместимой с веткой gvk/006, где служебных точек нет).
  *
- * @param path       точки трассы (не пустой, первая — стартовая)
- * @param primeFlags простота числа в соответствующей точке; длина = path.size()-1
- * @param values     числовые значения последовательности в точках; та же длина
- * @param bounds     ограничивающий прямоугольник трассы
- * @param algorithm  имя алгоритма визуализации (для отчётов и статистики)
+ * @param path      точки трассы (не пустой)
+ * @param primeFlags простота числа в соответствующей точке; длина = path.size()
+ * @param values    числовые значения последовательности в точках; та же длина
+ * @param bounds    ограничивающий прямоугольник трассы
+ * @param algorithm имя алгоритма визуализации (для отчётов и статистики)
  */
 public record VisualizationResult(List<Point2D.Double> path, boolean[] primeFlags,
                                   long[] values, Bounds bounds, String algorithm) {
@@ -30,17 +29,16 @@ public record VisualizationResult(List<Point2D.Double> path, boolean[] primeFlag
             throw new IllegalArgumentException("Путь не может быть пустым");
         }
         if (primeFlags.length != values.length) {
-            throw new IllegalArgumentException(
-                    "Длины primeFlags/values должны совпадать");
+            throw new IllegalArgumentException("Длины primeFlags/values должны совпадать");
         }
-        if (path.size() != primeFlags.length + 1) {
+        if (path.size() != primeFlags.length) {
             throw new IllegalArgumentException(
-                    "Длина path должна быть на 1 больше длины primeFlags/values");
+                    "Длина path должна совпадать с длиной primeFlags/values");
         }
         algorithm = algorithm == null ? "" : algorithm;
     }
 
-    /** Число точек трассы (включая стартовую). */
+    /** Число точек трассы. */
     public int size() {
         return path.size();
     }
@@ -53,4 +51,14 @@ public record VisualizationResult(List<Point2D.Double> path, boolean[] primeFlag
         }
         return c;
     }
+
+    // convenience-аксессоры границ (потребители ui/render читают их напрямую)
+
+    public double minX() { return bounds.minX(); }
+
+    public double maxX() { return bounds.maxX(); }
+
+    public double minY() { return bounds.minY(); }
+
+    public double maxY() { return bounds.maxY(); }
 }

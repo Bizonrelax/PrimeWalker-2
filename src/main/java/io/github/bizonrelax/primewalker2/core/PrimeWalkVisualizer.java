@@ -1,43 +1,43 @@
 package io.github.bizonrelax.primewalker2.core;
 
-import java.awt.geom.Point2D;
-
 /**
  * Ход простого числа (ТЗ, алгоритм 3): направление шага задаётся последней цифрой
- * простого числа; составные — шаг вправо (нейтральный). Правило ТЗ:
- * цифра 1 или 7 — влево, 3 или 9 — вправо, остальные простые цифры (2,5) — вверх.
- * Композиция направлений даёт запутанные траектории без накопления состояния.
+ * простого числа (кроме 2 и 5): 1 или 7 — влево, 3 или 9 — вправо, остальные — без
+ * смещения; составные числа шаг не двигают. Ось y — математическая.
  */
 public final class PrimeWalkVisualizer extends BaseVisualizer {
 
-    public PrimeWalkVisualizer() {
-        this(1.0);
-    }
+    public static final String NAME = "Prime Walk";
 
-    public PrimeWalkVisualizer(double scale) {
-        super(scale);
-    }
-
-    @Override
-    public String name() {
-        return "Prime Walk";
-    }
-
-    @Override
-    protected Point2D.Double startPoint() {
-        return new Point2D.Double(0, 0);
-    }
-
-    @Override
-    protected Point2D.Double step(long value, boolean isPrime) {
-        if (!isPrime) {
-            return new Point2D.Double(1, 0); // составное: нейтральный шаг вправо
-        }
-        long lastDigit = Math.floorMod(value, 10);
-        return switch ((int) lastDigit) {
-            case 1, 7 -> new Point2D.Double(-1, 0);          // влево
-            case 3, 9 -> new Point2D.Double(1, 0);           // вправо
-            default   -> new Point2D.Double(0, -1);          // 2,5: вверх (экранный dy)
+    /** Смещение (dx, dy) после числа n: ноль для составных, простых 2 и 5 и цифры 5. */
+    static int[] stepFor(long n) {
+        if (!PrimeSequences.isPrime(n) || n == 2 || n == 5) return new int[]{0, 0};
+        return switch ((int) Math.floorMod(n, 10)) {
+            case 1, 7 -> new int[]{-1, 0};
+            case 3, 9 -> new int[]{1, 0};
+            default -> new int[]{0, 0};   // 5 у простых — игнор (ТЗ: кроме 2 и 5)
         };
+    }
+
+    @Override
+    public String displayName() { return NAME; }
+
+    @Override
+    public VisualizationResult render(long start, int steps, double scale) {
+        checkSteps(steps);
+        checkScale(scale);
+        var xs = new double[steps];
+        var ys = new double[steps];
+        var vals = values(start, steps);
+        var fl = flags(start, steps);
+        double x = 0, y = 0;
+        for (int i = 0; i < steps; i++) {
+            xs[i] = x * scale;
+            ys[i] = y * scale;
+            int[] d = stepFor(vals[i]);
+            x += d[0];
+            y += d[1];
+        }
+        return bounds(xs, ys, vals, fl, NAME);
     }
 }
