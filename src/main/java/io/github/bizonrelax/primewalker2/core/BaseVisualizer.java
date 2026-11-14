@@ -49,8 +49,10 @@ public abstract class BaseVisualizer {
 
     /**
      * Полный цикл: точки, флаги простоты, значения, границы.
-     * Трасса содержит steps+1 точек: точка 0 — стартовая (позиция числа start),
-     * точка i+1 — позиция числа start+i после i шагов. Флаги и значения
+     * Трасса содержит steps+1 точек: точка 0 — служебная стартовая точка
+     * {@link #startPoint()}, точка i+1 — позиция числа start+i. Приращение
+     * {@link #step(long, boolean)} применяется на каждом числе (для первого
+     * числа подкласс возвращает нулевое смещение). Флаги и значения
      * соответствуют позициям чисел: {@code values[i] = start+i},
      * {@code primeFlags[i]} — простота этого числа.
      *
@@ -70,16 +72,15 @@ public abstract class BaseVisualizer {
 
         Point2D.Double startPt = startPoint();
         double cx = startPt.x, cy = startPt.y;
-        // узел 0 — стартовая точка (позиция числа start до первого перехода)
+        // узел 0 — служебная стартовая точка (не является позицией числа)
         path.add(new Point2D.Double(cx, cy));
+        bounds.extend(cx, cy);
         for (int i = 0; i < steps; i++) {
             long v = start + i;
-            if (i > 0) {
-                Point2D.Double d = step(v, isPrime(v));
-                // масштаб применяется к приращению: длина шага = scale единиц сетки
-                cx += d.x * scale;
-                cy += d.y * scale;
-            }
+            Point2D.Double d = step(v, isPrime(v));
+            // масштаб применяется к приращению: длина шага = scale единиц сетки
+            cx += d.x * scale;
+            cy += d.y * scale;
             path.add(new Point2D.Double(cx, cy));
             bounds.extend(cx, cy);
             flags[i] = isPrime(v);

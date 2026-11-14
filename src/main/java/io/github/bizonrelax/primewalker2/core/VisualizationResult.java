@@ -26,6 +26,9 @@ public record VisualizationResult(List<Point2D.Double> path, boolean[] primeFlag
         if (path == null || primeFlags == null || values == null || bounds == null) {
             throw new NullPointerException("Компоненты результата не могут быть null");
         }
+        if (path.isEmpty()) {
+            throw new IllegalArgumentException("Путь не может быть пустым");
+        }
         if (primeFlags.length != values.length) {
             throw new IllegalArgumentException(
                     "Длины primeFlags/values должны совпадать");
@@ -33,9 +36,6 @@ public record VisualizationResult(List<Point2D.Double> path, boolean[] primeFlag
         if (path.size() != primeFlags.length + 1) {
             throw new IllegalArgumentException(
                     "Длина path должна быть на 1 больше длины primeFlags/values");
-        }
-        if (path.isEmpty()) {
-            throw new IllegalArgumentException("Путь не может быть пустым");
         }
         algorithm = algorithm == null ? "" : algorithm;
     }

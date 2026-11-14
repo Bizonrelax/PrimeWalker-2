@@ -55,7 +55,7 @@ class VisualizerTest {
     void ulamScaleAffectsStepSize() {
         var v = new UlamSpiralVisualizer(2.0);
         var r = v.visualize(1, 2);
-        Point2D.Double p2 = r.path().get(1); // число 2: узел спирали (1,0)*scale
+        Point2D.Double p2 = r.path().get(2); // число 2: узел спирали (1,0)*scale
         assertEquals(2.0, p2.x, 1e-9);
         assertEquals(0.0, p2.y, 1e-9);
     }
@@ -68,18 +68,15 @@ class VisualizerTest {
         var r = v.visualize(1, 10); // числа 1..10, простые 2,3,5,7
         assertEquals("Jacob's Ladder", r.algorithm());
         double x = 0, y = 0;
-        int dir = -1; // направление лестницы: -1 => первый простой уходит вниз (y++)
-        // узел i — позиция числа 1+i в трассе path.get(i) (path[0] совпадает с ним);
-        // переход к следующему числу применяется с i>=1
+        int dir = -1; // направление лестницы: -1 => вверх по сетке, экранный dy = +1 (y++)
+        // узел i+1 — позиция числа 1+i (после i+1 шагов от служебной точки 0)
         for (int i = 0; i < 10; i++) {
             long val = 1 + i;
-            if (i > 0) {
-                if (val == 2 || val == 3 || val == 5 || val == 7) dir = -dir;
-                x += 1;
-                y += dir; // dir=-1 => вниз по экрану (y увеличивается)
-            }
-            assertEquals(x, r.path().get(i).x, 1e-9, "x at " + val);
-            assertEquals(y, r.path().get(i).y, 1e-9, "y at " + val);
+            if (val == 2 || val == 3 || val == 5 || val == 7) dir = -dir;
+            x += 1;
+            y -= dir; // dir=-1 => вниз по экрану (y увеличивается)
+            assertEquals(x, r.path().get(i + 1).x, 1e-9, "x at " + val);
+            assertEquals(y, r.path().get(i + 1).y, 1e-9, "y at " + val);
         }
     }
 
@@ -102,6 +99,7 @@ class VisualizerTest {
         // позиции чисел 1..12: 1=(0,0); 2 вверх; 3 вправо; 4 вправо; 5 вверх; 6 вправо;
         // 7 влево; 8 вправо; 9 вправо; 10 вправо; 11 влево; 12 вправо
         double x = 0, y = 0;
+        x += 1;           // 1 (составное: нейтральный шаг вправо)
         y -= 1;           // 2
         x += 1;           // 3
         x += 1;           // 4
@@ -113,8 +111,8 @@ class VisualizerTest {
         x += 1;           // 10
         x -= 1;           // 11
         x += 1;           // 12
-        assertEquals(x, r.path().get(11).x, 1e-9);
-        assertEquals(y, r.path().get(11).y, 1e-9);
+        assertEquals(x, r.path().get(12).x, 1e-9);
+        assertEquals(y, r.path().get(12).y, 1e-9);
     }
 
     // --- Общие требования BaseVisualizer ---
@@ -143,8 +141,20 @@ class VisualizerTest {
 
     @Test
     void resultValidatesConsistentLengths() {
+        // служебная точка + 1 число — корректно
+        assertDoesNotThrow(() -> new VisualizationResult(
+                java.util.List.of(new Point2D.Double(0, 0), new Point2D.Double(1, 0)),
+                new boolean[1], new long[1],
+                new Bounds(), "x"));
+        // path и primeFlags должны различаться ровно на одну (служебную) точку
         assertThrows(IllegalArgumentException.class, () -> new VisualizationResult(
-                java.util.List.of(new Point2D.Double(0, 0)), new boolean[0], new long[0],
+                java.util.List.of(), new boolean[0], new long[0],
+                new Bounds(), "x"));
+        assertThrows(IllegalArgumentException.class, () -> new VisualizationResult(
+                java.util.List.of(new Point2D.Double(0, 0), new Point2D.Double(1, 0)),
+                new boolean[0], new long[0], new Bounds(), "x"));
+        assertThrows(IllegalArgumentException.class, () -> new VisualizationResult(
+                java.util.List.of(new Point2D.Double(0, 0)), new boolean[1], new long[0],
                 new Bounds(), "x"));
     }
 }
