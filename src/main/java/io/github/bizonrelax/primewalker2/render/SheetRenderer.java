@@ -95,6 +95,50 @@ public final class SheetRenderer {
         return sheet;
     }
 
+    /**
+     * Меточный оверлей (crop/registration метки, линии реза, нумерация, TOP) для
+     * уже собранного изображения листа. Используется экспортом (фрагмент 004).
+     */
+    public BufferedImage renderMarks(BufferedImage content, TilingPlan plan,
+                                     int col, int row, RenderOptions opts) {
+        int dpi = plan.dpi();
+        double pxPerMm = dpi / 25.4;
+        int sw = content.getWidth(), sh = content.getHeight();
+        var img = new BufferedImage(sw, sh, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = img.createGraphics();
+        try {
+            g.drawImage(content, 0, 0, null);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            double left = CUT_L * pxPerMm, right = CUT_R * pxPerMm;
+            double top = CUT_T * pxPerMm, bottom = CUT_B * pxPerMm;
+            double cropLen = CROP_LEN_MM * pxPerMm;
+            g.setColor(markColor(opts));
+            g.setStroke(new BasicStroke(Math.max(1, dpi / 150f)));
+            drawCropMarks(g, left, right, top, bottom, cropLen);
+            drawRegistrationMarks(g, left, right, top, bottom, cropLen);
+
+            g.setColor(new Color(0x80_80_80));
+            g.setStroke(new BasicStroke(1f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER,
+                    1f, new float[]{6f, 6f}, 0f));
+            g.draw(new Line2D.Double(left, top, left, bottom));
+            g.draw(new Line2D.Double(right, top, right, bottom));
+            g.draw(new Line2D.Double(left, top, right, top));
+            g.draw(new Line2D.Double(left, bottom, right, bottom));
+
+            int number = row * plan.sheetsWide() + col + 1;
+            g.setColor(markColor(opts));
+            g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, Math.max(10, dpi / 10)));
+            g.drawString(number + " из " + plan.totalSheets(), 2f, (float) (CUT_L * pxPerMm) - 3f);
+            String topMark = "^ TOP";
+            var fm = g.getFontMetrics();
+            g.drawString(topMark, (sw - fm.stringWidth(topMark)) / 2f,
+                    (float) (CUT_L * pxPerMm) - 3f);
+        } finally {
+            g.dispose();
+        }
+        return img;
+    }
+
     /** Контрастный с фоном цвет меток. */
     private static Color markColor(RenderOptions opts) {
         var bg = opts.background();
