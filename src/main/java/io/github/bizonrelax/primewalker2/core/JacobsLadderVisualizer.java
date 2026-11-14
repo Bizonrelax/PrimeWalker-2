@@ -20,11 +20,11 @@ public final class JacobsLadderVisualizer extends BaseVisualizer {
         var ys = new double[steps];
         var vals = values(start, steps);
         var fl = flags(start, steps);
-        int dir = 1; // вверх по сетке (ТЗ, алгоритм 2: направление меняется НА простом числе)
+        int dir = -1; // вверх по сетке (ТЗ, алгоритм 2: направление меняется НА простом числе)
         double y = 0;
         for (int i = 0; i < steps; i++) {
             if (i > 0) {
-                if (fl[i]) dir = -dir; // разворот на предшествующем простом, шаг — в новом направлении
+                if (fl[i - 1]) dir = -dir; // разворот на предшествующем простом, шаг — в новом направлении
                 y += dir;              // затем шаг в новом направлении
             }
             xs[i] = i * scale;
