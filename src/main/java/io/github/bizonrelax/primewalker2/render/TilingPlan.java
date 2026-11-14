@@ -20,6 +20,10 @@ public final class TilingPlan {
     public static final double OVERLAP_MM = 10.0;
     /** Отступ начала печатной области от края листа, мм. */
     public static final double PRINTABLE_MM = PRINTER_UNPRINTABLE_MM + OVERLAP_MM; // 15
+    /** Шаг сетки листов по X, мм: поле склейки плюс неизвлекаемое поле с противоположной стороны. */
+    public static final double STEP_X_MM = A4_WIDTH_MM - PRINTER_UNPRINTABLE_MM - OVERLAP_MM; // 195
+    /** Шаг сетки листов по Y, мм. */
+    public static final double STEP_Y_MM = A4_HEIGHT_MM - PRINTER_UNPRINTABLE_MM - OVERLAP_MM; // 282
 
     private final int wPx, hPx, dpi;
     private final double stepXmm, stepYmm;
@@ -29,12 +33,24 @@ public final class TilingPlan {
         this.wPx = wPx;
         this.hPx = hPx;
         this.dpi = dpi;
-        this.stepXmm = A4_WIDTH_MM - 2 * PRINTABLE_MM; // 180
-        this.stepYmm = A4_HEIGHT_MM - 2 * PRINTABLE_MM; // 267
+        // Шаг сетки листов = поле склейки внутри листа (PRINTABLE_MM) плюс
+        // неизвлекаемое поле с противоположной стороны листа: при наклеивании
+        // поле склейки одного листа перекрывает неизвлекаемое поле соседнего.
+        this.stepXmm = STEP_X_MM;
+        this.stepYmm = STEP_Y_MM;
         double stepXpx = mmToPx(stepXmm, dpi);
         double stepYpx = mmToPx(stepYmm, dpi);
-        this.sheetsWide = Math.max(1, (int) Math.ceil(wPx / stepXpx));
-        this.sheetsHigh = Math.max(1, (int) Math.ceil(hPx / stepYpx));
+        // последний лист col покрывает постер до (col*stepXpx + areaX), где areaX —
+        // печатная область листа; отсюда число листов при точных кратных шага: N шагов -> N+? 
+        // допуск 1 пиксель: целый размер постера round(N*step) может на ~1px
+        // превышать точное N*step; при этом шаг заведомо >20px, так что
+        // реальный переход через границу (N+1) листов не теряется
+        this.sheetsWide = countSheets(wPx, stepXpx);
+        this.sheetsHigh = countSheets(hPx, stepYpx);
+    }
+
+    private static int countSheets(int px, double stepPx) {
+        return Math.max(1, (int) Math.ceil((px - 1.0) / stepPx));
     }
 
     /** Миллиметры в пиксели при заданном DPI. */

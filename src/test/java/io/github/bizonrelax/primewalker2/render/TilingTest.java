@@ -7,12 +7,10 @@ import static org.junit.jupiter.api.Assertions.*;
 /** Тесты плана тесселяции A4 (фрагмент 003). */
 class TilingTest {
 
-    /** Шаг сетки листов по X, мм. */
-    private static final double STEP_X_MM = TilingPlan.A4_WIDTH_MM
-            - TilingPlan.PRINTER_UNPRINTABLE_MM * 2 - TilingPlan.OVERLAP_MM; // 180
+    /** Шаг сетки листов по X, мм (поле склейки + неизвлекаемое поле). */
+    private static final double STEP_X_MM = TilingPlan.STEP_X_MM; // 195
     /** Шаг сетки листов по Y, мм. */
-    private static final double STEP_Y_MM = TilingPlan.A4_HEIGHT_MM
-            - TilingPlan.PRINTER_UNPRINTABLE_MM * 2 - TilingPlan.OVERLAP_MM; // 267
+    private static final double STEP_Y_MM = TilingPlan.STEP_Y_MM; // 282
 
     @Test
     void smallImageFitsOneSheet() {
@@ -28,21 +26,21 @@ class TilingTest {
     @Test
     void computesGridWithOverlap() {
         int dpi = 300;
-        // чуть больше 4 шагов по X -> 5 колонок; больше 1 шага по Y -> 2 ряда
-        int w = (int) Math.ceil(TilingPlan.mmToPx(4 * STEP_X_MM + 1, dpi));
-        int h = (int) TilingPlan.mmToPx(STEP_Y_MM + 1, dpi);
+        // ровно 4 шага по X -> 4 колонки; чуть больше 1 шага по Y -> 2 ряда
+        int w = (int) Math.floor(TilingPlan.mmToPx(4 * STEP_X_MM, dpi));
+        int h = (int) Math.ceil(TilingPlan.mmToPx(STEP_Y_MM + 1, dpi));
         TilingPlan plan = TilingPlan.forImage(w, h, dpi);
-        assertEquals(5, plan.sheetsWide());
+        assertEquals(4, plan.sheetsWide());
         assertEquals(2, plan.sheetsHigh());
-        assertEquals(10, plan.totalSheets());
+        assertEquals(8, plan.totalSheets());
     }
 
     @Test
     void exactlyFourStepsIsFourColumns() {
         int dpi = 300;
-        int w = (int) Math.round(TilingPlan.mmToPx(4 * STEP_X_MM, dpi));
+        int w = (int) Math.floor(TilingPlan.mmToPx(4 * STEP_X_MM, dpi));
         assertEquals(4, TilingPlan.forImage(w, 100, dpi).sheetsWide());
-        assertEquals(5, TilingPlan.forImage(w + 1, 100, dpi).sheetsWide());
+        assertEquals(5, TilingPlan.forImage(w + 2, 100, dpi).sheetsWide());
     }
 
     @Test

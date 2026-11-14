@@ -62,13 +62,15 @@ public final class RenderService {
                 opts.widthPx(), opts.heightPx(), java.awt.image.BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = img.createGraphics();
         try {
-            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
             g.setColor(opts.background());
             g.fillRect(0, 0, opts.widthPx(), opts.heightPx());
 
+            // линия трассы рисуется первой, точки поверх — центр каждой точки
+            // всегда чистого цвета точки (линии не перекрашивают его)
             if (opts.drawPath() && path.size() > 1) {
                 g.setColor(opts.pathColor());
-                g.setStroke(new BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g.setStroke(new BasicStroke(1f));
                 for (int i = 1; i < path.size(); i++) {
                     Point2D.Double a = path.get(i - 1), b = path.get(i);
                     g.draw(new Line2D.Double(pose.px(a.x), pose.py(a.y), pose.px(b.x), pose.py(b.y)));
@@ -89,11 +91,13 @@ public final class RenderService {
                 } else {
                     continue; // составные без modulo не рисуем яркими
                 }
-                g.setColor(c);
                 double x = pose.px(path.get(i).x), y = pose.py(path.get(i).y);
-                g.fillRoundRect((int) Math.round(x - ps / 2.0), (int) Math.round(y - ps / 2.0),
-                        ps, ps, ps, ps);
+                int cx = (int) Math.round(x), cy = (int) Math.round(y);
+                // нечётный ps гарантирует: ровно один пиксель (центр сетки) внутри квадрата
+                g.setColor(c);
+                g.fillRect(cx - ps / 2, cy - ps / 2, ps, ps);
             }
+
         } finally {
             g.dispose();
         }

@@ -20,7 +20,7 @@ class RenderTest {
     void rendersPrimePointsAndBackground() {
         var svc = new RenderService();
         var opts = new RenderOptions(200, 200, 300, Color.WHITE,
-                Color.RED, Color.BLUE, Color.GRAY, 0, 6, false);
+                Color.RED, Color.BLUE, Color.GRAY, 0, 1, true);
         BufferedImage img = svc.renderImage(squarePath(),
                 new boolean[]{true, false, true, false}, null,
                 new Pose(15, 15, 10, 10), opts);
@@ -91,5 +91,4 @@ class RenderTest {
         assertThrows(IllegalArgumentException.class, () -> sr.renderSheet(
                 List.of(), new boolean[0], null, plan, 3, 0, RenderOptions.defaults(100, 100)));
     }
-}
 }
