@@ -24,7 +24,7 @@ public final class JacobsLadderVisualizer extends BaseVisualizer {
         double y = 0;
         for (int i = 0; i < steps; i++) {
             if (i > 0) {
-                if (fl[i]) dir = -dir; // разворот происходит на простом текущем числе
+                if (fl[i - 1]) dir = -dir; // разворот на предшествующем простом, шаг — в новом направлении
                 y += dir;              // затем шаг в новом направлении
             }
             xs[i] = i * scale;
