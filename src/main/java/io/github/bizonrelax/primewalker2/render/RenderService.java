@@ -59,7 +59,7 @@ public final class RenderService {
                                                     boolean[] primeFlags, long[] values,
                                                     Pose pose, RenderOptions opts) {
         var img = new java.awt.image.BufferedImage(
-                opts.widthPx(), opts.heightPx(), java.awt.image.BufferedImage.TYPE_INT_ARGB);
+                opts.widthPx(), opts.heightPx(), java.awt.image.BufferedImage.TYPE_INT_RGB);
         Graphics2D g = img.createGraphics();
         try {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -93,9 +93,25 @@ public final class RenderService {
                 }
                 double x = pose.px(path.get(i).x), y = pose.py(path.get(i).y);
                 int cx = (int) Math.round(x), cy = (int) Math.round(y);
-                // нечётный ps гарантирует: ровно один пиксель (центр сетки) внутри квадрата
+                // диск радиусом pointSizePx/2 вокруг точного (вещественного) центра точки;
+                // сам центр закрашивается безусловно — пиксель под ним всегда чистый цвет точки
+                double rad = ps / 2.0;
                 g.setColor(c);
-                g.fillRect(cx - ps / 2, cy - ps / 2, ps, ps);
+                int reach = (int) Math.ceil(rad);
+                for (int dy = -reach; dy <= reach; dy++) {
+                    for (int dx = -reach; dx <= reach; dx++) {
+                        if (dx == 0 && dy == 0) continue;
+                        double sx = cx + dx - x, sy = cy + dy - y;
+                        if (sx * sx + sy * sy > rad * rad) continue;
+                        int px = cx + dx, py = cy + dy;
+                        if (px >= 0 && py >= 0 && px < opts.widthPx() && py < opts.heightPx()) {
+                            img.setRGB(px, py, c.getRGB());
+                        }
+                    }
+                }
+                if (cx >= 0 && cy >= 0 && cx < opts.widthPx() && cy < opts.heightPx()) {
+                    img.setRGB(cx, cy, c.getRGB());
+                }
             }
 
         } finally {
