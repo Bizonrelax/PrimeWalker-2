@@ -34,13 +34,13 @@ class VisualizerTest {
     void jacobsLadderFlipsDirectionOnPrimes() {
         var v = new JacobsLadderVisualizer();
         var r = v.render(2, 6, 1.0); // 2P 3P 4 5P 6 7P; стартовое направление — вверх (ТЗ)
-        // y фиксируется до смены направления; scale=1.0 для шага лестницы:
-        assertEquals(0.0, r.ys()[0]);   // 2: старт, простое -> разворот вниз
-        assertEquals(1.0, r.ys()[1]);   // 3: шаг вверх, простое -> разворот вниз
-        assertEquals(-1.0, r.ys()[2]);  // 4: вниз, не простое
-        assertEquals(-2.0, r.ys()[3]);  // 5: вниз, простое -> разворот вверх
-        assertEquals(-1.0, r.ys()[4]);  // 6: вверх
-        assertEquals(0.0, r.ys()[5]);   // 7: вверх, простое -> разворот
+        // ys[i] — позиция точки i; направление меняется на простых (разворот влияет на следующий шаг):
+        assertEquals(0.0, r.ys()[0]);   // 2: старт (простое -> далее вниз)
+        assertEquals(-1.0, r.ys()[1]);  // 3: вниз, простое -> далее вверх
+        assertEquals(0.0, r.ys()[2]);   // 4: вверх, не простое
+        assertEquals(1.0, r.ys()[3]);   // 5: вверх, простое -> далее вниз
+        assertEquals(0.0, r.ys()[4]);   // 6: вниз
+        assertEquals(-1.0, r.ys()[5]);  // 7: вниз, простое -> разворот
     }
 
     @Test
