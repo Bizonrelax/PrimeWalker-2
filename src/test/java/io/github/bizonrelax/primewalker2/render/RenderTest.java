@@ -21,7 +21,7 @@ class RenderTest {
         var path = List.of(new Double(0, 0), new Double(10, 0),
                 new Double(10, 10), new Double(0, 10));
         BufferedImage img = svc.renderImage(path,
-                new boolean[]{true, false, true, false}, null,
+                new boolean[]{true, true, true, false}, null,
                 new Pose(15, 15, 10, 10), opts);
         assertEquals(200, img.getWidth());
         // фон белый в пустой области
