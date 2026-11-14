@@ -21,7 +21,10 @@ class RenderTest {
         var svc = new RenderService();
         var opts = new RenderOptions(200, 200, 300, Color.WHITE,
                 Color.RED, Color.BLUE, Color.GRAY, 0, 1, true);
-        BufferedImage img = svc.renderImage(squarePath(),
+        // квадратный контур против часовой: (0,0)->(10,0)->(10,10)->(0,10)
+        var path = List.of(new Double(0, 0), new Double(10, 0),
+                new Double(10, 10), new Double(0, 10));
+        BufferedImage img = svc.renderImage(path,
                 new boolean[]{true, false, true, false}, null,
                 new Pose(15, 15, 10, 10), opts);
         assertEquals(200, img.getWidth());
