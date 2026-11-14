@@ -15,13 +15,13 @@ public final class JacobsLadderVisualizer extends BaseVisualizer {
         var ys = new double[steps];
         var vals = new long[steps];
         var fl = new boolean[steps];
-        int dir = 1;
+        int dir = -1; // стартовое направление — вниз (экранная ось Y растёт вниз, как в UlamSpiralVisualizer)
         double lvl = 0;
         for (int i = 0; i < steps; i++) {
             vals[i] = Math.addExact(start, i);
             fl[i] = Primes.isPrime(vals[i]);
             xs[i] = i * scale;
-            ys[i] = lvl;
+            ys[i] = lvl * scale; // шаг лестницы равен масштабу ТЗ, как в других визуализациях
             if (fl[i]) { dir = -dir; }
             lvl += dir;
         }
