@@ -34,6 +34,7 @@ class VisualizerTest {
         assertEquals("Ulam Spiral", r.algorithm());
         // простые до 24: 2,3,5,7,11,13,17,19,23
         assertEquals(9, r.primeCount());
+        assertFalse(r.primeFlags()[0]);  // число 1 — не простое
         assertTrue(r.primeFlags()[1]);   // число 2
         assertFalse(r.primeFlags()[3]);  // число 4
     }
@@ -41,9 +42,12 @@ class VisualizerTest {
     @Test
     void ulamBoundsCoverFullSpiral() {
         var v = new UlamSpiralVisualizer();
-        var r = v.visualize(1, 24); // числа 1..24 -> кольцо 2 (до 25) не достигнут, max кольцо r=... 24 в кольце 2? (2r+1)^2=25>=24, prevMax=9 -> idx=15<=4s=8? no: idx=24-9=15 > 12 => нижняя строка x=-2+t, t=15-12=3 => (-2+3,-2)=(1,-2)? wait 25=(3,-3)... проверим границы диапазона
+        var r = v.visualize(1, 24);
+        // числа 1..24 лежат внутри кольца радиуса 2 ((2*2+1)^2 = 25 >= 24),
+        // поэтому границы трассы не выходят за [-2, 2] по обеим осям
         assertTrue(r.bounds().minX() >= -2 && r.bounds().maxX() <= 2);
         assertTrue(r.bounds().minY() >= -2 && r.bounds().maxY() <= 2);
+        // pointCount — число точек трассы; минус стартовая точка = число шагов
         assertEquals(24, r.bounds().pointCount() - 1);
     }
 
@@ -64,14 +68,15 @@ class VisualizerTest {
         var r = v.visualize(1, 10); // числа 1..10, простые 2,3,5,7
         assertEquals("Jacob's Ladder", r.algorithm());
         double x = 0, y = 0;
-        int dir = -1; // направление лестницы: -1 => первый простой уходит вверх
-        // узел i — позиция числа 1+i; переход к узлу применяется с i>=1
+        int dir = -1; // направление лестницы: -1 => первый простой уходит вниз (y++)
+        // узел i — позиция числа 1+i в трассе path.get(i) (path[0] совпадает с ним);
+        // переход к следующему числу применяется с i>=1
         for (int i = 0; i < 10; i++) {
             long val = 1 + i;
             if (i > 0) {
                 if (val == 2 || val == 3 || val == 5 || val == 7) dir = -dir;
                 x += 1;
-                y += dir; // dir=-1 => вверх по экрану (y уменьшается)
+                y += dir; // dir=-1 => вниз по экрану (y увеличивается)
             }
             assertEquals(x, r.path().get(i).x, 1e-9, "x at " + val);
             assertEquals(y, r.path().get(i).y, 1e-9, "y at " + val);
@@ -133,7 +138,7 @@ class VisualizerTest {
         var v = new UlamSpiralVisualizer();
         var r = assertDoesNotThrow(() -> v.visualize(-5, 10));
         assertEquals(-5, r.values()[0]);
-        assertEquals(0, r.primeCount()); // -5..4 не содержат простых
+        assertEquals(2, r.primeCount()); // -5..4 содержат простые 2 и 3
     }
 
     @Test

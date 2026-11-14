@@ -49,6 +49,10 @@ public abstract class BaseVisualizer {
 
     /**
      * Полный цикл: точки, флаги простоты, значения, границы.
+     * Трасса содержит steps+1 точек: точка 0 — стартовая (позиция числа start),
+     * точка i+1 — позиция числа start+i после i шагов. Флаги и значения
+     * соответствуют позициям чисел: {@code values[i] = start+i},
+     * {@code primeFlags[i]} — простота этого числа.
      *
      * @param start начальное число (любое целое по ТЗ)
      * @param steps количество чисел-шагов, 1..MAX_STEPS
@@ -66,6 +70,8 @@ public abstract class BaseVisualizer {
 
         Point2D.Double startPt = startPoint();
         double cx = startPt.x, cy = startPt.y;
+        // узел 0 — стартовая точка (позиция числа start до первого перехода)
+        path.add(new Point2D.Double(cx, cy));
         for (int i = 0; i < steps; i++) {
             long v = start + i;
             if (i > 0) {

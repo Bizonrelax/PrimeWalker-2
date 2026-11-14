@@ -48,12 +48,14 @@ public final class RenderService {
      * Простые точки рисуются цветом opts.primeColor (или палитрой modulo),
      * последняя точка — opts.endColor, линия трассы — opts.pathColor.
      *
-     * @param path       точки трассы в координатах сетки
-     * @param primeFlags флаги простоты, те же индексы, что и path
-     * @param values     числовые значения в точках (для modulo-окраски); может быть null
+     * @param path       точки трассы в координатах сетки (первая — служебная стартовая)
+     * @param primeFlags флаги простоты для точек 1..; индекс i соответствует path[i+1]
+     *                   (соглашение VisualizationResult); может быть null
+     * @param values     числовые значения последовательности (для modulo-окраски);
+     *                   тот же сдвиг индексов, что и primeFlags; может быть null
      * @param pose       преобразование сетка-&gt;пиксели (для одной плитки передаётся сдвиг)
      * @param opts       параметры рендеринга
-     * @return готовое изображение TYPE_INT_ARGB
+     * @return готовое изображение TYPE_INT_RGB
      */
     public java.awt.image.BufferedImage renderImage(List<Point2D.Double> path,
                                                     boolean[] primeFlags, long[] values,
@@ -78,15 +80,17 @@ public final class RenderService {
             }
 
             int ps = opts.pointSizePx();
-            for (int i = 0; i < path.size(); i++) {
-                boolean isPrime = primeFlags != null && i < primeFlags.length && primeFlags[i];
+            // точки 1.. соответствуют флагам/значениям (path[0] — служебная стартовая)
+            for (int i = 1; i < path.size(); i++) {
+                int j = i - 1;
+                boolean isPrime = primeFlags != null && j < primeFlags.length && primeFlags[j];
                 boolean isLast = i == path.size() - 1;
                 Color c;
                 if (isLast) {
                     c = opts.endColor();
                 } else if (isPrime) {
-                    c = (opts.modulo() > 0 && values != null && i < values.length)
-                            ? moduloColor(values[i], opts.modulo())
+                    c = (opts.modulo() > 0 && values != null && j < values.length)
+                            ? moduloColor(values[j], opts.modulo())
                             : opts.primeColor();
                 } else {
                     continue; // составные без modulo не рисуем яркими
