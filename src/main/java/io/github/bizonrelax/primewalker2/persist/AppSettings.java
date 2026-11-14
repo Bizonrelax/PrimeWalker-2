@@ -66,7 +66,13 @@ public final class AppSettings {
     public long getLong(String key, long def) {
         String s = p.getProperty(key);
         if (s == null) return def;
-        try { return Long.parseLong(s.trim()); } catch (NumberFormatException e) { return def; }
+        s = s.trim();
+        try { return Long.parseLong(s); }
+        catch (NumberFormatException e) {
+            // значения, записанные через Properties-парсер (например, из JSON-проекта),
+            // могут прийти как "1.0" — допускаем double-форму целых
+            try { return (long) Double.parseDouble(s); } catch (NumberFormatException e2) { return def; }
+        }
     }
 
     public double getDouble(String key, double def, double min, double max) {

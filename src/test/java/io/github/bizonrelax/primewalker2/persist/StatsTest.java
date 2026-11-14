@@ -40,10 +40,10 @@ class StatsTest {
     @Test void largestImageRecordOnlyGrows() {
         GlobalStats g = new GlobalStats(fresh());
         g.imageGenerated(1000, 1000);
-        g.imageGenerated(800, 800);   // меньше — игнор
-        g.imageGenerated(200, 5000);  // больше по площади
+        g.imageGenerated(800, 800);    // меньше — игнор
+        g.imageGenerated(200, 6000);   // больше по площади (1.2M > 1.0M)
         assertEquals(200, g.largestImageWidth());
-        assertEquals(5000, g.largestImageHeight());
+        assertEquals(6000, g.largestImageHeight());
     }
 
     @Test void resetClearsStatsOnly() {
