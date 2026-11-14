@@ -12,10 +12,6 @@ import static org.junit.jupiter.api.Assertions.*;
 /** Тесты рендеринга трассы и листов (фрагмент 003). Headless-safe: только BufferedImage. */
 class RenderTest {
 
-    private static List<Double> squarePath() {
-        return List.of(new Double(0, 0), new Double(10, 0), new Double(10, 10), new Double(0, 10));
-    }
-
     @Test
     void rendersPrimePointsAndBackground() {
         var svc = new RenderService();
