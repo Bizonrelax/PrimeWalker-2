@@ -28,7 +28,7 @@ class ExportTest {
                     Color.GRAY, 0, 2, true);
 
     private static io.github.bizonrelax.primewalker2.core.VisualizationResult spiral() {
-        return new UlamSpiralVisualizer(1.0).visualize(1, 60);
+        return new UlamSpiralVisualizer().render(1, 60, 1.0);
     }
 
     @Test
