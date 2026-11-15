@@ -104,6 +104,10 @@ public final class AppSettings {
 
     public java.util.Set<String> stringPropertyNames() { return p.stringPropertyNames(); }
 
+    /** Путь последнего сохранённого проекта; пусто — проект ещё не сохранялся (ТЗ, project/latestSavePath). */
+    public String latestSavePath() { return getString("project/latestSavePath", ""); }
+    public void setLatestSavePath(String path) { put("project/latestSavePath", path); }
+
     // ---------- типизированные геттеры по ключам ТЗ ----------
 
     public int startNumber()      { return getInt("ui/startNumber", 1, Integer.MIN_VALUE, Integer.MAX_VALUE); }
