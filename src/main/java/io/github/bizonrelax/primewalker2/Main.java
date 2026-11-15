@@ -25,7 +25,8 @@ public final class Main {
     }
 
     private static void run() {
-        // TODO(фрагмент 006): new ui.MainWindow(persist.AppSettings.load()).showAndRun();
-        System.out.println("PrimeWalker-2: UI is provided by fragment 006.");
+        var st = new io.github.bizonrelax.primewalker2.persist.AppSettings();
+        st.load();
+        new io.github.bizonrelax.primewalker2.ui.MainWindow(st).showAndRun();
     }
 }
