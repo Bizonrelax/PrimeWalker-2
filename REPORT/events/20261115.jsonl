@@ -1,0 +1,2 @@
+{"schema":"gvk/event/1","at":"2026-11-15T22:30:00Z","owner":"qwen-code-fire-ff1","role":"FIREFIGHTER","event":"birth","detail":"lever ПОЖАР, protocol GVK-PROTOCOL:ALV-5.0_PPV-5.0_TAV-1.0","protocol_ver":"GVK-PROTOCOL:ALV-5.0_PPV-5.0_TAV-1.0"}
+{"schema":"gvk/event/1","at":"2026-11-15T22:30:05Z","owner":"qwen-code-fire-ff1","role":"FIREFIGHTER","event":"claim","detail":"GVK/roles/FIREFIGHTER.md 201, branch gvk/fire","protocol_ver":"GVK-PROTOCOL:ALV-5.0_PPV-5.0_TAV-1.0"}
