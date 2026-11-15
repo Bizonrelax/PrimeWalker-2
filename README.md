@@ -8,7 +8,7 @@
 
 PrimeWalker-2 is an offline desktop application that turns sequences of prime numbers into large-format visual artworks (Ulam spiral, Jacob's ladder, prime walk) and exports them as PNG/JPG/PDF/ZIP ready for poster printing.
 
-> **Status: framework skeleton (fragment 000).** The features below are specified by the project brief (`docs/TZ.md`) and are being implemented fragment by fragment. This section will be completed as functionality lands.
+> **Status: release candidate v1.0.0 (fragments 000–006 integrated on `gvk/007`).** All core functionality from the project brief (`docs/TZ.md`) is implemented and covered by tests (64/64 green). Closing merge into `main` is performed per GVK protocol Part 7.
 
 ### Who it is for
 
@@ -36,15 +36,18 @@ Unzip the archive into any folder. No installation; portable by copying the fold
 
 ### Quick start
 
-To be documented when the UI (fragment 006) is merged.
+1. Unzip the portable folder and run `PrimeWalker-2\bin\PrimeWalker-2.exe`.
+2. Pick a visualization (Ulam spiral / Jacob's ladder / prime walk), a prime generation strategy and a color-modulo scheme in the toolbar.
+3. Press Render; pan/zoom the canvas to inspect the pattern.
+4. Press Export, choose PNG/JPG/PDF or multi-sheet ZIP (A4 tiling with bleed and crop marks plus assembly instructions) and save.
 
 ### User manual
 
-To be documented when the UI (fragment 006) is merged.
+The main window has three areas: settings panel (left), canvas (center), status bar (bottom). Project save/load (`.pwalk` JSON) is under File menu; settings and global statistics persist automatically between sessions; light/dark theme is switchable in View menu.
 
 ### Examples
 
-To be documented when rendering/export (fragments 003–004) are merged.
+Try `spiral, modulo 6` starting at 2 with ~10,000 steps — the classic Ulam diagonal clustering appears; export as PDF A4 tiles for poster printing.
 
 ### Data storage
 
@@ -62,7 +65,7 @@ To be completed at closing.
 
 ### Limitations
 
-Current build is a skeleton: no GUI yet. Maximum steps per render: 100,000,000 (per TZ).
+Current build is the full v1.0.0 candidate (GUI included). Maximum steps per render: 100,000,000 (per TZ). PDF/X-4 certification is unavailable on this stack; export produces a print-ready PDF with bleed and crop marks (see AUDIT.md decision 2). Portable image must be built on Windows for the final `.exe` ZIP artifact.
 
 ### Uninstall
 
@@ -80,7 +83,7 @@ Public Domain (see `LICENSE`).
 
 PrimeWalker-2 — офлайн-настольное приложение, превращающее последовательности простых чисел в крупноформатные визуальные работы (спираль Улама, лестница Иакова, prime walk) и экспортирующее их в PNG/JPG/PDF/ZIP, готовых к постерной печати.
 
-> **Статус: каркас (фрагмент 000).** Функциональность ниже задана техническим заданием (`docs/TZ.md`) и реализуется по фрагментам; раздел будет дополнен по мере готовности.
+> **Статус: кандидат релиза v1.0.0 (фрагменты 000–006 интегрированы в `gvk/007`).** Вся функциональность по техническому заданию (`docs/TZ.md`) реализована и покрыта тестами (64/64 зелёные). Закрывающее слияние в `main` выполняется по Части 7 протокола GVK.
 
 ### Для кого
 
@@ -108,15 +111,18 @@ Windows 11 x64. Java **не нужна** — рантайм встроен в п
 
 ### Быстрый старт
 
-Будет описан после слияния интерфейса (фрагмент 006).
+1. Распакуйте переносимую папку и запустите `PrimeWalker-2\bin\PrimeWalker-2.exe`.
+2. Выберите визуализацию (спираль Улама / лестница Иакова / prime walk), стратегию генерации простых чисел и цветовую схему по модулю на панели настроек.
+3. Нажмите «Отрисовать»; перемещайте и масштабируйте холст для изучения узора.
+4. Нажмите «Экспорт» и сохраните PNG/JPG/PDF или многосоставной ZIP (нарезка A4 с полями склейки, монтажными метками и инструкцией по сборке).
 
 ### Руководство пользователя
 
-Будет описано после слияния интерфейса (фрагмент 006).
+Главное окно состоит из трёх областей: панель настроек (слева), холст (центр), строка состояния (снизу). Сохранение/загрузка проектов (JSON `.pwalk`) — в меню «Файл»; настройки и глобальная статистика сохраняются автоматически между сессиями; светлая/тёмная тема переключается в меню «Вид».
 
 ### Примеры
 
-Будут добавлены после слияния рендеринга и экспорта (фрагменты 003–004).
+Попробуйте «спираль, модуль 6», старт от 2, ~10 000 шагов — классическое диагональное скопление Улама; экспортируйте в PDF-плитки A4 для печати постера.
 
 ### Хранение данных
 
@@ -134,7 +140,7 @@ Windows 11 x64. Java **не нужна** — рантайм встроен в п
 
 ### Ограничения
 
-Текущая сборка — каркас: графического интерфейса ещё нет. Максимум шагов на отрисовку: 100 000 000 (по ТЗ).
+Текущая сборка — полный кандидат v1.0.0 (с GUI). Максимум шагов на отрисовку: 100 000 000 (по ТЗ). Сертификация PDF/X-4 недоступна на данном стеке; экспорт формирует печатно-готовый PDF с полями склейки и монтажными метками (решение 2 в AUDIT.md). Финальный переносимый образ (.exe) собирается на Windows.
 
 ### Удаление
 
