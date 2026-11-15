@@ -74,4 +74,16 @@ class SettingsTest {
         a.put("export/history", "2026-01-01T00:00:00Z,/x.png,10,20,0.5;junk-line;2026-01-02T00:00:00Z,/y.png,30,40,1.0");
         assertEquals(2, a.exportHistory().size());
     }
+
+    @Test void latestSavePathRoundTrip() {
+        Path f = tmp.resolve("s5.properties");
+        AppSettings a = new AppSettings(f);
+        a.load();
+        assertEquals("", a.latestSavePath(), "до первого сохранения путь пуст");
+        a.setLatestSavePath("/home/u/projects/demo.pwalk");
+        a.save();
+        AppSettings b = new AppSettings(f);
+        b.load();
+        assertEquals("/home/u/projects/demo.pwalk", b.latestSavePath());
+    }
 }
