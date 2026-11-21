@@ -1,0 +1,16 @@
+{
+  "seq": 9,
+  "id": "EVT-009",
+  "ts": "2026-11-22T18:41:02Z",
+  "type": "commit",
+  "session_id": "S-2026-11-22-DEV-002",
+  "role": "DEV",
+  "cause": "dev-request",
+  "payload": {
+    "hash": "c07ce5a",
+    "branch": "main",
+    "message": "task snapshot: CHANGE-001 реализация — 2D prime walk, компоновка окна, зум Ctrl+колесо (11 файлов, +414/-30)",
+    "note": "фактический коммит реализации; ранее записанное EVT-004 (1b8a43e) содержало неточный хеш"
+  },
+  "prev_event_id": "EVT-008"
+}

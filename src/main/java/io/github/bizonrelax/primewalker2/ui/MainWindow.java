@@ -89,7 +89,7 @@ public final class MainWindow extends JFrame {
     private final JButton settingsBtn = new JButton("Настройки");
     private final JButton exportBtn = new JButton("Экспорт");
     private final JLabel progressLabel = new JLabel(" ");
-    private final Canvas canvas = new Canvas();
+    final Canvas canvas = new Canvas(); // package-private: доступ тестам компоновки/зума (LayoutZoomTest)
 
     private final RenderService renderer = new RenderService();
     private final AtomicBoolean cancelFlag = new AtomicBoolean();
@@ -634,7 +634,7 @@ public final class MainWindow extends JFrame {
 
         private void onWheel(MouseWheelEvent e) {
             var img = imageCache;
-            if (img == null) return;
+            if (img == null || getWidth() < 10 || getHeight() < 10) return; // холст ещё не реализован
             if (e.isControlDown()) {
                 // ТЗ: масштабирование рисунка колесом мыши с зажатым Ctrl — к точке под курсором
                 double factor = e.getWheelRotation() < 0 ? ZOOM_STEP : 1.0 / ZOOM_STEP;
@@ -728,6 +728,7 @@ public final class MainWindow extends JFrame {
 
     void setImage(java.awt.image.BufferedImage img) {
         imageCache = img;
+        canvas.validate(); // синхронная раскладка: реализация холста для тестов и корректного зума к курсору
         canvas.repaint();
     }
 }

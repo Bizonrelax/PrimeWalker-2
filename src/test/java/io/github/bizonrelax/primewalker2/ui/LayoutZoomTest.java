@@ -61,11 +61,13 @@ class LayoutZoomTest {
         st.load();
         var w = new MainWindow(st);
         try {
-            w.setSize(1280, 720);
             w.setVisible(true);
+            w.setSize(1280, 720);
+            // setImage вызывает validate(): холст реализуется синхронно (тесты идут на EDT)
             w.setImage(new BufferedImage(400, 300, BufferedImage.TYPE_INT_RGB));
-            w.doLayout();
             var canvas = w.canvasView();
+            assertTrue(canvas.getWidth() >= 50 && canvas.getHeight() >= 50,
+                    "холст реализован: " + canvas.getSize());
             assertEquals(1.0, canvas.viewZoom(), 1e-9);
             // десять щелчков колеса с Ctrl вверх → зум ≈ 1.1^10 ≈ 2.59
             for (int i = 0; i < 10; i++) {

@@ -1,0 +1,15 @@
+{
+  "seq": 8,
+  "id": "EVT-008",
+  "ts": "2026-11-22T18:41:01Z",
+  "type": "checkpoint",
+  "session_id": "S-2026-11-22-DEV-002",
+  "role": "DEV",
+  "cause": "protocol-mandate",
+  "payload": {
+    "file": "GVK/changes/CHANGE-001.md",
+    "sha256_16": "e98dba9cc4feca65",
+    "note": "артефакт сверки ЖЕЛАНИЕ<->ТЗ"
+  },
+  "prev_event_id": "EVT-007"
+}

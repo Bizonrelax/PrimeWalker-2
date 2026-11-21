@@ -1,0 +1,15 @@
+{
+  "seq": 7,
+  "id": "EVT-007",
+  "ts": "2026-11-22T18:41:00Z",
+  "type": "checkpoint",
+  "session_id": "S-2026-11-22-DEV-002",
+  "role": "DEV",
+  "cause": "protocol-mandate",
+  "payload": {
+    "file": "docs/TZ.md",
+    "sha256_16": "d4da83c469f5522d",
+    "note": "ТЗ рев.2 зафиксирована в git (snapshot c07ce5a)"
+  },
+  "prev_event_id": "EVT-006"
+}

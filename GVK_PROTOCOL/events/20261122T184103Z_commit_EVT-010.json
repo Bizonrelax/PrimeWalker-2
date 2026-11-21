@@ -1,0 +1,16 @@
+{
+  "seq": 10,
+  "id": "EVT-010",
+  "ts": "2026-11-22T18:41:03Z",
+  "type": "commit",
+  "session_id": "S-2026-11-22-DEV-002",
+  "role": "DEV",
+  "cause": "dev-request",
+  "payload": {
+    "hash": "7e45f61",
+    "branch": "main",
+    "message": "task snapshot: fix MainWindow + VisualizerTest (+6/-4)",
+    "note": "последующая правка тестов/окна"
+  },
+  "prev_event_id": "EVT-009"
+}

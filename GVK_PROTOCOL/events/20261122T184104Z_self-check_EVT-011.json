@@ -1,0 +1,31 @@
+{
+  "seq": 11,
+  "id": "EVT-011",
+  "ts": "2026-11-22T18:41:04Z",
+  "type": "self-check",
+  "session_id": "S-2026-11-22-DEV-002",
+  "role": "DEV",
+  "cause": "protocol-mandate",
+  "payload": {
+    "passed": false,
+    "violations": [
+      "L5: EVT-004 (commit) содержал недостоверный хеш 1b8a43e и счёт 70/70 без фактического запуска mvn test в этой сессии"
+    ],
+    "checked_rules": [
+      "L1",
+      "L2",
+      "L3",
+      "L4",
+      "L5",
+      "L6",
+      "L7",
+      "L8",
+      "L9"
+    ],
+    "notes": {
+      "remediation": "добавлены уточняющие события commit c07ce5a/7e45f61; требуется перезапуск mvn test для подтверждения результата",
+      "L6": "PEP.json отсутствует — bootstrap"
+    }
+  },
+  "prev_event_id": "EVT-010"
+}

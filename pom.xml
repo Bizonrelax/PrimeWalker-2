@@ -17,6 +17,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <main.class>io.github.bizonrelax.primewalker2.Main</main.class>
     <junit.version>5.10.2</junit.version>
+    <surefire.headless>true</surefire.headless>
   </properties>
 
   <dependencies>
@@ -41,7 +42,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.2.5</version>
         <configuration>
-          <argLine>-Dfile.encoding=UTF-8 -Djava.awt.headless=true</argLine>
+          <argLine>-Dfile.encoding=UTF-8 -Djava.awt.headless=${surefire.headless}</argLine>
           <excludedGroups>gui</excludedGroups>
         </configuration>
       </plugin>
@@ -77,4 +78,14 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- GUI-тесты (LayoutZoomTest): запуск под Xvfb: mvn test -Pgui-tests -->
+    <profile>
+      <id>gui-tests</id>
+      <properties>
+        <surefire.headless>false</surefire.headless>
+      </properties>
+    </profile>
+  </profiles>
 </project>
