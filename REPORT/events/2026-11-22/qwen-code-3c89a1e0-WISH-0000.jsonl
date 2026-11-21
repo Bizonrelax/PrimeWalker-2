@@ -1,0 +1,4 @@
+{"at": "2026-11-22T00:00:00Z", "type": "claim", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "GVK/roles/WISH.md"}
+{"at": "2026-11-22T00:00:00Z", "type": "birth", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "GVK/births/20261122T0000-qwen-code-3c89a1e0.md"}
+{"at": "2026-11-22T00:20:00Z", "type": "tz_change", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "docs/TZ.md ревизия 2: двумерный Prime Walk, компоновка окна 1920x1080, зум Ctrl+колесо; cause=wish CHANGE-001"}
+{"at": "2026-11-22T00:30:00Z", "type": "release_claim", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "GVK/roles/WISH.md"}

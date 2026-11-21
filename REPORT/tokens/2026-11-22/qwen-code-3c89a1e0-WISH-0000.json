@@ -1,0 +1,11 @@
+{
+ "owner": "qwen-code-3c89a1e0",
+ "role": "WISH",
+ "fragment": "CHANGE-001",
+ "date": "2026-11-22",
+ "input_tokens_est": 26000,
+ "output_tokens_est": 4200,
+ "total_tokens_est": 30200,
+ "exact": false,
+ "note": "оценка по байтам прочитанных/записанных файлов"
+}

@@ -2,11 +2,20 @@ package io.github.bizonrelax.primewalker2.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.RenderingHints;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.time.Instant;
 import java.util.List;
@@ -43,14 +52,21 @@ import io.github.bizonrelax.primewalker2.render.RenderOptions;
 import io.github.bizonrelax.primewalker2.render.RenderService;
 
 /**
- * Главное окно PrimeWalker-2 (порт ui.MainWindow, фрагмент 006): панель параметров слева,
- * холст трассы в центре, фоновый worker с прогрессом и остановкой, экспорт через диалог,
- * пост-отчёт об отрисовке, темы light/dark, восстановление геометрии окна, сохранение настроек при закрытии.
+ * Главное окно PrimeWalker-2 (порт ui.MainWindow, фрагмент 006; компоновка и просмотр —
+ * ТЗ рев.2 / CHANGE-001): панель параметров слева фиксированной ширины ~320 px в две колонки
+ * без прокрутки при развёрнутом окне 1920×1080, кнопки действий внизу панели, холст трассы
+ * в центре на всю оставшуюся площадь, строка состояния на всю ширину окна, фоновый worker
+ * с прогрессом и остановкой, экспорт через диалог, пост-отчёт об отрисовке, темы light/dark,
+ * восстановление геометрии окна, сохранение настроек при закрытии.
+ * Просмотр: Ctrl+колесо — зум к курсору, колесо — панорамирование, двойной клик — «вписать».
  */
 public final class MainWindow extends JFrame {
 
     private static final int CANVAS_MAX_PX = 4096;
     private static final int MAX_STEPS_UI = 100_000_000; // ТЗ: ограничение числа шагов (PrimeGenerator.MAX_STEPS)
+    private static final int PANEL_WIDTH = 320;          // ТЗ рев.2: ширина панели ~320 px
+    private static final double ZOOM_STEP = 1.10;        // ТЗ рев.2: 10 % за щелчок колеса
+    private static final double ZOOM_MAX = 40.0;         // ТЗ рев.2: до ~40× над подгонкой
 
     private final AppSettings st;
     private final GlobalStats stats;
@@ -95,12 +111,20 @@ public final class MainWindow extends JFrame {
             @Override public void windowClosing(java.awt.event.WindowEvent e) { closeApp(); }
         });
         JPanel side = buildSidePanel();
-        var scroll = new JScrollPane(side);
-        scroll.setPreferredSize(new Dimension(260, 100));
+        side.setPreferredSize(new Dimension(PANEL_WIDTH, 0));
+        side.setMinimumSize(new Dimension(PANEL_WIDTH, 0));
+        // ТЗ рев.2: панель без прокрутки при развёрнутом окне; прокрутка — аварийный режим
+        // только когда окно сильно уменьшено (минимальная высота панели меньше высоты окна).
+        var scroll = new JScrollPane(side,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setPreferredSize(new Dimension(PANEL_WIDTH, 100));
+        scroll.setMinimumSize(new Dimension(PANEL_WIDTH, 100));
         scroll.setBorder(BorderFactory.createEmptyBorder());
+        JPanel center = new JPanel(new BorderLayout());
+        center.add(canvas, BorderLayout.CENTER);
         add(scroll, BorderLayout.WEST);
-        add(canvas, BorderLayout.CENTER);
-        add(progressLabel, BorderLayout.SOUTH);
+        add(center, BorderLayout.CENTER);
+        add(progressLabel, BorderLayout.SOUTH); // строка состояния на всю ширину окна (ТЗ рев.2)
         setJMenuBar(buildMenu());
         installShortcuts();
         restoreGeometry();
@@ -121,11 +145,12 @@ public final class MainWindow extends JFrame {
         var p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        p.add(group("Параметры генерации",
+        // ТЗ рев.2: двухколоночная панель — компактная раскладка, всё видно без прокрутки на 1080p
+        p.add(group2("Параметры генерации",
                 row("Начальное число", startNum),
                 row("Число шагов", steps),
                 row("Масштаб", scale)));
-        p.add(group("Настройки визуализации",
+        p.add(group2("Настройки визуализации",
                 row("Тип визуализации", vizBox),
                 row("Модуль цвета", moduloBox),
                 row("Цвет начальной точки", startColorBtn),
@@ -134,7 +159,18 @@ public final class MainWindow extends JFrame {
                 row("Цвет фона", bgBox),
                 row("Тема", themeBox),
                 row("Размер шрифта UI", fontSpin)));
-        p.add(group("Действия", generateBtn, stopBtn, settingsBtn, exportBtn));
+        // Кнопки действий закреплены внизу панели (ТЗ рев.2) и остаются видимыми при любом размере окна:
+        // блок «Настройки / Экспорт» — в SOUTH содержимого прокручиваемой панели, вне потока параметров.
+        var aux = new JPanel(new GridLayout(1, 2, 6, 0));
+        aux.add(settingsBtn);
+        aux.add(exportBtn);
+        var actions = new JPanel(new BorderLayout(0, 4));
+        var mainBtns = group("Действия", generateBtn, stopBtn);
+        mainBtns.setMaximumSize(new Dimension(Integer.MAX_VALUE, mainBtns.getPreferredSize().height));
+        actions.add(mainBtns, BorderLayout.NORTH);
+        actions.add(aux, BorderLayout.SOUTH);
+        actions.setAlignmentX(LEFT_ALIGNMENT);
+        p.add(actions);
         p.add(Box.createVerticalGlue());
 
         generateBtn.addActionListener(e -> startGeneration());
@@ -143,6 +179,18 @@ public final class MainWindow extends JFrame {
         exportBtn.addActionListener(e -> ExportDialog.open(this, st, stats, result));
         stopBtn.setEnabled(false);
         return p;
+    }
+
+    /** Группа в две колонки (ТЗ рев.2, требование 3): логическая группа сохраняется. */
+    private static JPanel group2(String title, JComponent... rows) {
+        var outer = new JPanel(new BorderLayout());
+        outer.setBorder(BorderFactory.createTitledBorder(title));
+        var grid = new JPanel(new GridLayout(0, 2, 6, 4));
+        for (var r : rows) grid.add(r);
+        outer.add(grid, BorderLayout.NORTH);
+        outer.setAlignmentX(LEFT_ALIGNMENT);
+        outer.setMaximumSize(new Dimension(Integer.MAX_VALUE, outer.getPreferredSize().height));
+        return outer;
     }
 
     private static JPanel group(String title, JComponent... rows) {
@@ -213,10 +261,7 @@ public final class MainWindow extends JFrame {
         st.put("ui/backgroundColor", bgBox.getSelectedItem());
         st.put("ui/theme", themeBox.getSelectedItem());
         st.put("ui/fontSize", fontSpin.getValue());
-        st.put("window/x", getX());
-        st.put("window/y", getY());
-        st.put("window/width", getWidth());
-        st.put("window/height", getHeight());
+        saveGeometry(); // ТЗ рев.2: геометрия + состояние развёрнутости окна
     }
 
     private int moduloIndex() {
@@ -276,12 +321,29 @@ public final class MainWindow extends JFrame {
 
     private void restoreGeometry() {
         int w = st.windowWidth(), h = st.windowHeight();
+        // ТЗ рев.2: базовый размер не меньше 1280×720 — панель помещается без прокрутки
+        w = Math.max(w, 1280);
+        h = Math.max(h, 720);
         setSize(w, h);
+        setMinimumSize(new Dimension(800, 600));
+        if (st.windowMaximized()) setExtendedState(MAXIMIZED_BOTH);
         int x = st.windowX(), y = st.windowY();
         if (x >= 0 && y >= 0) {
             setLocation(x, y);
         } else {
             setLocationRelativeTo(null);
+        }
+    }
+
+    /** Сохранение геометрии и состояния развёрнутости окна (ТЗ рев.2). */
+    private void saveGeometry() {
+        boolean maximized = (getExtendedState() & MAXIMIZED_BOTH) == MAXIMIZED_BOTH;
+        st.put("window/maximized", maximized);
+        if (!maximized) {
+            st.put("window/x", getX());
+            st.put("window/y", getY());
+            st.put("window/width", getWidth());
+            st.put("window/height", getHeight());
         }
     }
 
@@ -302,7 +364,7 @@ public final class MainWindow extends JFrame {
         cancelFlag.set(false);
         stopBtn.setEnabled(true);
         generateBtn.setEnabled(false);
-        progressLabel.setText("Считаем простые и трассу…");
+        updateStatus("Считаем простые и трассу…");
         worker = new Thread(() -> compute(v, start, n, sc, modulo, bg, pc, ec, tc), "pw-worker");
         worker.setDaemon(true);
         worker.start();
@@ -336,7 +398,7 @@ public final class MainWindow extends JFrame {
             stopBtn.setEnabled(false);
             generateBtn.setEnabled(true);
             if (r == null) {
-                progressLabel.setText("Остановлено.");
+                updateStatus("Остановлено.");
                 return;
             }
             result = r;
@@ -344,8 +406,9 @@ public final class MainWindow extends JFrame {
             stats.imageGenerated(r.widthPx(), r.heightPx());
             saveFormIntoSettings();
             st.save();
+            canvas.resetView(); // новая картинка — вид заново «вписать в окно» (ТЗ рев.2)
             canvas.repaint();
-            progressLabel.setText(String.format("Готово: %d шагов, расчёт %d мс, рендер %d мс.",
+            updateStatus(String.format("Готово: %d шагов, расчёт %d мс, рендер %d мс.",
                     r.values().length, r.calcMs(), renderMs));
             if (!java.awt.GraphicsEnvironment.isHeadless()) showPostReport(r);
         });
@@ -441,7 +504,7 @@ public final class MainWindow extends JFrame {
             pm.saveProject(ch.getSelectedFile().toPath(), ps);
             st.put("project/latestSavePath", ch.getSelectedFile().getAbsolutePath());
             st.save();
-            progressLabel.setText("Проект сохранён: " + ch.getSelectedFile().getName());
+            updateStatus("Проект сохранён: " + ch.getSelectedFile().getName());
         } catch (Exception ex) {
             showError("Не удалось сохранить проект", ex);
         }
@@ -462,7 +525,7 @@ public final class MainWindow extends JFrame {
             pathColorBtn.setBackground(parseColor(ps.colors().path(), Color.BLACK));
             st.put("project/latestSavePath", ch.getSelectedFile().getAbsolutePath());
             st.save();
-            progressLabel.setText("Проект загружен: " + ch.getSelectedFile().getName());
+            updateStatus("Проект загружен: " + ch.getSelectedFile().getName());
             startGeneration();
         } catch (Exception ex) {
             showError("Не удалось открыть проект", ex);
@@ -529,10 +592,86 @@ public final class MainWindow extends JFrame {
 
     // ---------- холст ----------
 
+    /**
+     * Холст трассы (ТЗ рев.2 / CHANGE-001): Ctrl+колесо — масштабирование к курсору
+     * (10 % за щелчок, от подгонки до ~40×), колесо без Ctrl — панорамирование,
+     * двойной клик — возврат к «вписать в окно», коэффициент зума — в строке состояния.
+     */
     private final class Canvas extends JPanel {
+
+        private double zoom = 1.0;          // множитель над базовой подгонкой
+        private double panX, panY;          // смещение центра картинки относительно центра холста
+        private Point dragStart;            // точка начала протяжки мышью
+        private double dragPanX, dragPanY;
+
         Canvas() {
             setOpaque(true);
             setPreferredSize(new Dimension(600, 400));
+            addMouseWheelListener(this::onWheel);
+            addMouseListener(new MouseAdapter() {
+                @Override public void mouseClicked(MouseEvent e) {
+                    if (e.getClickCount() == 2) resetView();
+                }
+                @Override public void mousePressed(MouseEvent e) {
+                    dragStart = e.getPoint(); dragPanX = panX; dragPanY = panY;
+                    setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+                }
+                @Override public void mouseDragged(MouseEvent e) {
+                    if (dragStart == null) return;
+                    panX = dragPanX + (e.getX() - dragStart.x);
+                    panY = dragPanY + (e.getY() - dragStart.y);
+                    repaint();
+                }
+                @Override public void mouseReleased(MouseEvent e) {
+                    dragStart = null;
+                    setCursor(Cursor.getDefaultCursor());
+                }
+            });
+        }
+
+        /** Сброс зума и панорамы — вид «вписать в окно». */
+        void resetView() { zoom = 1.0; panX = 0; panY = 0; updateStatus(lastMessage); }
+
+        private void onWheel(MouseWheelEvent e) {
+            var img = imageCache;
+            if (img == null) return;
+            if (e.isControlDown()) {
+                // ТЗ: масштабирование рисунка колесом мыши с зажатым Ctrl — к точке под курсором
+                double factor = e.getWheelRotation() < 0 ? ZOOM_STEP : 1.0 / ZOOM_STEP;
+                double nz = Math.max(1.0, Math.min(ZOOM_MAX, zoom * factor));
+                if (nz != zoom) {
+                    double cx = getWidth() / 2.0 + panX, cy = getHeight() / 2.0 + panY;
+                    double dx = e.getX() - cx, dy = e.getY() - cy;
+                    double k = nz / zoom;
+                    panX = cx + dx / k - getWidth() / 2.0; // точка под курсором остаётся на месте
+                    panY = cy + dy / k - getHeight() / 2.0;
+                    zoom = nz;
+                    updateStatus(lastMessage);
+                    repaint();
+                }
+            } else {
+                // колесо без Ctrl — панорамирование по вертикали, Shift+колесо — по горизонтали
+                int d = e.getUnitsToScroll();
+                if (e.isShiftDown()) panX -= d; else panY -= d;
+                clampPan(img);
+                repaint();
+            }
+        }
+
+        private void clampPan(java.awt.image.BufferedImage img) {
+            double[] f = fittedScale(img);
+            double dw = img.getWidth() * f[0] * zoom, dh = img.getHeight() * f[1] * zoom;
+            double maxX = Math.max(0, (dw - getWidth()) / 2.0) + 64;
+            double maxY = Math.max(0, (dh - getHeight()) / 2.0) + 64;
+            panX = Math.max(-maxX, Math.min(maxX, panX));
+            panY = Math.max(-maxY, Math.min(maxY, panY));
+        }
+
+        private double[] fittedScale(java.awt.image.BufferedImage img) {
+            double fx = (double) getWidth() / img.getWidth();
+            double fy = (double) getHeight() / img.getHeight();
+            double fit = Math.min(1.0, Math.min(fx, fy)); // не увеличиваем выше подгонки
+            return new double[]{fit, fit};
         }
 
         @Override
@@ -552,13 +691,34 @@ public final class MainWindow extends JFrame {
                 g.fillRect(0, 0, getWidth(), getHeight());
                 return;
             }
-            int x = (getWidth() - img.getWidth()) / 2;
-            int y = (getHeight() - img.getHeight()) / 2;
-            g.drawImage(img, x, y, null);
+            double[] f = fittedScale(img);
+            double sx = f[0] * zoom, sy = f[1] * zoom;
+            int x = (int) Math.round(getWidth() / 2.0 - img.getWidth() * sx / 2.0 + panX);
+            int y = (int) Math.round(getHeight() / 2.0 - img.getHeight() * sy / 2.0 + panY);
+            g.drawImage(img, new AffineTransform(sx, 0, 0, sy, x, y), null);
         }
+
+        /** Текущий коэффициент зума для строки состояния (ТЗ: индикатор масштаба). */
+        double viewZoom() { return zoom; }
     }
 
     private volatile java.awt.image.BufferedImage imageCache;
+    private String lastMessage = " ";
+
+    /** Строка состояния на всю ширину окна; показывает зум (ТЗ рев.2). */
+    void updateStatus(String msg) {
+        lastMessage = msg;
+        double z = canvas.viewZoom();
+        progressLabel.setText(z > 1.001 || msg.isEmpty()
+                ? msg + "  Масштаб: ×" + String.format("%.1f", z)
+                : msg);
+    }
+
+    /** Панорамирование и зум холста — доступны тестам компоновки/просмотра. */
+    Canvas canvasView() { return canvas; }
+
+    /** Текст строки состояния — для тестов индикатора масштаба. */
+    String getStatusTextForTests() { return progressLabel.getText(); }
 
     public java.awt.image.BufferedImage currentImage() { return imageCache; }
 

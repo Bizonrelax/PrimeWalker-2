@@ -126,6 +126,8 @@ public final class AppSettings {
     public int windowY()          { return getInt("window/y", -1, -1, Integer.MAX_VALUE); }
     public int windowWidth()      { return getInt("window/width", 1024, 200, 100000); }
     public int windowHeight()     { return getInt("window/height", 768, 200, 100000); }
+    /** Состояние «развёрнуто» главного окна (ТЗ рев.2, window/maximized). */
+    public boolean windowMaximized(){ return getBool("window/maximized", false); }
 
     // ---------- история экспорта (список записей ExportRecord, newest last) ----------
 

@@ -83,7 +83,9 @@ class VisualizerTest {
     @Test
     void primeWalkUsesLastDigitRule() {
         assertArrayEquals(new int[]{-1, 0}, PrimeWalkVisualizer.stepFor(11)); // ...1 влево
-        assertArrayEquals(new int[]{1, 0}, PrimeWalkVisualizer.stepFor(13));  // ...3 вправо
+        assertArrayEquals(new int[]{0, 1}, PrimeWalkVisualizer.stepFor(13));  // ...3 вверх (ТЗ рев.2)
+        assertArrayEquals(new int[]{1, 0}, PrimeWalkVisualizer.stepFor(17));  // ...7 вправо (ТЗ рев.2)
+        assertArrayEquals(new int[]{0, -1}, PrimeWalkVisualizer.stepFor(19)); // ...9 вниз (ТЗ рев.2)
         assertArrayEquals(new int[]{0, 0}, PrimeWalkVisualizer.stepFor(4));   // составное — стоя
         assertArrayEquals(new int[]{0, 0}, PrimeWalkVisualizer.stepFor(2));   // 2 игнорируется ТЗ
         assertArrayEquals(new int[]{0, 0}, PrimeWalkVisualizer.stepFor(5));   // 5 игнорируется ТЗ
@@ -91,6 +93,7 @@ class VisualizerTest {
         assertEquals(0.0, r.path().get(0).x, 1e-9);
         assertEquals(-1.0, r.path().get(1).x, 1e-9); // после 11 сдвиг влево
         assertEquals(-1.0, r.path().get(2).x, 1e-9); // 12 составное — без сдвига
+        assertEquals(0.0, r.path().get(2).y, 1e-9);
     }
 
     @Test
@@ -98,6 +101,18 @@ class VisualizerTest {
         var r = new PrimeWalkVisualizer().render(24, 3, 1.0); // 24,25,26 — все составные
         assertEquals(0.0, r.path().get(2).x, 1e-9);
         assertEquals(0.0, r.path().get(2).y, 1e-9);
+    }
+
+    @Test
+    void primeWalkIsTwoDimensionalNotAStrip() {
+        // ТЗ рев.2 (CHANGE-001): трасса не должна вырождаться в узкую горизонтальную полосу
+        var r = new PrimeWalkVisualizer().render(2, 5000, 1.0);
+        double spanX = r.maxX() - r.minX();
+        double spanY = r.maxY() - r.minY();
+        assertTrue(spanX > 10, "размах по X: " + spanX);
+        assertTrue(spanY > 10, "размах по Y: " + spanY);
+        assertTrue(Math.min(spanX, spanY) / Math.max(spanX, spanY) > 0.1,
+                "трасса вырождена в полосу: " + spanX + "x" + spanY);
     }
 
     // --- Общие требования BaseVisualizer ---
