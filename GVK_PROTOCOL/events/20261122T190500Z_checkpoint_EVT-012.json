@@ -1,0 +1,14 @@
+{
+  "seq": 12,
+  "id": "EVT-012",
+  "ts": "2026-11-22T19:05:00Z",
+  "type": "checkpoint",
+  "session_id": "S-2026-11-22-DEV-003",
+  "role": "DEV",
+  "cause": "protocol-mandate",
+  "payload": {
+    "change_id": "CHANGE-001",
+    "note": "Владелец не видел изменений в репозитории: рабочая копия была без remote origin; все коммиты CHANGE-001 оставались локальными. Добавлен remote origin, выполнен fast-forward push HEAD:main (afc219e..4e1d40a). Тесты в этой сессии не перезапускались; подтвержденный ранее прогон — EVT-003."
+  },
+  "prev_event_id": "EVT-011"
+}
