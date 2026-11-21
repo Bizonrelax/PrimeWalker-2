@@ -597,7 +597,7 @@ public final class MainWindow extends JFrame {
      * (10 % за щелчок, от подгонки до ~40×), колесо без Ctrl — панорамирование,
      * двойной клик — возврат к «вписать в окно», коэффициент зума — в строке состояния.
      */
-    private final class Canvas extends JPanel {
+    final class Canvas extends JPanel {
 
         private double zoom = 1.0;          // множитель над базовой подгонкой
         private double panX, panY;          // смещение центра картинки относительно центра холста

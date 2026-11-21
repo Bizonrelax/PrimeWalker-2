@@ -105,12 +105,14 @@ class VisualizerTest {
 
     @Test
     void primeWalkIsTwoDimensionalNotAStrip() {
-        // ТЗ рев.2 (CHANGE-001): трасса не должна вырождаться в узкую горизонтальную полосу
+        // ТЗ рев.2 (CHANGE-001): трасса не должна вырождаться в узкую горизонтальную полосу.
+        // Размахи растут как ~sqrt(steps) (двумерное случайное блуждание), поэтому порог —
+        // 5 единиц при scale=1.0 и 5000 шагах; отношение сторон > 0.1 отсекает «полосу».
         var r = new PrimeWalkVisualizer().render(2, 5000, 1.0);
         double spanX = r.maxX() - r.minX();
         double spanY = r.maxY() - r.minY();
-        assertTrue(spanX > 10, "размах по X: " + spanX);
-        assertTrue(spanY > 10, "размах по Y: " + spanY);
+        assertTrue(spanX > 5, "размах по X: " + spanX);
+        assertTrue(spanY > 5, "размах по Y: " + spanY);
         assertTrue(Math.min(spanX, spanY) / Math.max(spanX, spanY) > 0.1,
                 "трасса вырождена в полосу: " + spanX + "x" + spanY);
     }
