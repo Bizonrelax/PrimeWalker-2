@@ -1,0 +1,18 @@
+{
+  "seq": 4,
+  "id": "EVT-004",
+  "ts": "2026-11-22T18:40:03Z",
+  "type": "commit",
+  "session_id": "S-2026-11-22-DEV-002",
+  "role": "DEV",
+  "cause": "dev-request",
+  "payload": {
+    "hash": "1b8a43e",
+    "branch": "main",
+    "files_changed": 12,
+    "insertions": 178,
+    "deletions": 40,
+    "message": "feat(ui): CHANGE-001 (TZ rev.2): 2D prime walk, window layout for 1920x1080, ctrl+wheel zoom; fix tests"
+  },
+  "prev_event_id": "EVT-003"
+}

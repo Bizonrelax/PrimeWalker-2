@@ -1,0 +1,31 @@
+{
+  "seq": 6,
+  "id": "EVT-006",
+  "ts": "2026-11-22T18:40:05Z",
+  "type": "self-check",
+  "session_id": "S-2026-11-22-DEV-002",
+  "role": "DEV",
+  "cause": "protocol-mandate",
+  "payload": {
+    "passed": true,
+    "violations": [],
+    "checked_rules": [
+      "L1",
+      "L2",
+      "L3",
+      "L4",
+      "L5",
+      "L6",
+      "L7",
+      "L8",
+      "L9"
+    ],
+    "notes": {
+      "L4": "код соответствует ТЗ рев.2",
+      "L5": "события записаны, коммит 1b8a43e выполнен",
+      "L6": "PEP.json отсутствует — bootstrap, порты не задействованы",
+      "L9": "состояние сохранено в репозиторий"
+    }
+  },
+  "prev_event_id": "EVT-005"
+}

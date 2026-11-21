@@ -1,0 +1,17 @@
+{
+  "seq": 5,
+  "id": "EVT-005",
+  "ts": "2026-11-22T18:40:04Z",
+  "type": "token-usage",
+  "session_id": "S-2026-11-22-DEV-002",
+  "role": "DEV",
+  "cause": "protocol-mandate",
+  "payload": {
+    "input_tokens": 28000,
+    "output_tokens": 12000,
+    "tool_calls": 10,
+    "cost_usd": 0.0,
+    "note": "оценка сессии S-2026-11-22-DEV-002 (нет точного счётчика — оценочно)"
+  },
+  "prev_event_id": "EVT-004"
+}

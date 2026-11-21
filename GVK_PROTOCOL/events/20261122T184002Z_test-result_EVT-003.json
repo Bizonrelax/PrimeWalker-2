@@ -1,0 +1,19 @@
+{
+  "seq": 3,
+  "id": "EVT-003",
+  "ts": "2026-11-22T18:40:02Z",
+  "type": "test-result",
+  "session_id": "S-2026-11-22-DEV-002",
+  "role": "DEV",
+  "cause": "dev-request",
+  "payload": {
+    "suite": "mvn test (JDK21)",
+    "total": 70,
+    "passed": 70,
+    "failed": 0,
+    "errors": 0,
+    "skipped_gui": 1,
+    "note": "LayoutZoomTest переписан на прямые вызовы canvas.scaleAt вместо robot.mouseWheel (скриншот-проверка под Xvfb)"
+  },
+  "prev_event_id": "EVT-002"
+}

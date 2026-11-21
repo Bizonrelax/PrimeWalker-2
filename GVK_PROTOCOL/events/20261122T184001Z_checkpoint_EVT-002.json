@@ -1,0 +1,15 @@
+{
+  "seq": 2,
+  "id": "EVT-002",
+  "ts": "2026-11-22T18:40:01Z",
+  "type": "checkpoint",
+  "session_id": "S-2026-11-22-DEV-002",
+  "role": "DEV",
+  "cause": "protocol-mandate",
+  "payload": {
+    "file": "docs/TZ.md",
+    "sha256_16": "d4da83c469f5522d",
+    "note": "ТЗ рев.2: двумерный Prime Walk, компоновка окна 1920x1080, зум Ctrl+колесо"
+  },
+  "prev_event_id": "EVT-001"
+}
