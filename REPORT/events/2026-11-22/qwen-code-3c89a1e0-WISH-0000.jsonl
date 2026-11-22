@@ -2,3 +2,8 @@
 {"at": "2026-11-22T00:00:00Z", "type": "birth", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "GVK/births/20261122T0000-qwen-code-3c89a1e0.md"}
 {"at": "2026-11-22T00:20:00Z", "type": "tz_change", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "docs/TZ.md ревизия 2: двумерный Prime Walk, компоновка окна 1920x1080, зум Ctrl+колесо; cause=wish CHANGE-001"}
 {"at": "2026-11-22T00:30:00Z", "type": "release_claim", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "GVK/roles/WISH.md"}
+{"at": "2026-11-22T07:34:57Z", "type": "wish", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "РЫЧАГ ЖЕЛАНИЕ: добавить CI-воркфлов сборки PrimeWalker-2-windows-portable.zip + пуш (причина: артефакт не собирался — отсутствовал workflow)"}
+{"at": "2026-11-22T07:34:57Z", "type": "capture_role", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "GVK/roles/WISH.md CLAIM-WISH-002, fragment CHANGE-002"}
+{"at": "2026-11-22T07:34:57Z", "type": "tz_change", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "docs/TZ.md ревизия 3, п.4: требование автоматической сборки Windows-пакета в CI; cause=wish CHANGE-002"}
+{"at": "2026-11-22T07:34:57Z", "type": "change_note", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "GVK/changes/CHANGE-002.md создан"}
+{"at": "2026-11-22T07:34:57Z", "type": "release_claim", "owner": "qwen-code-3c89a1e0", "role": "WISH", "detail": "GVK/roles/WISH.md status=released после коммита и push origin/main"}
